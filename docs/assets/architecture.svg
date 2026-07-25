@@ -1,0 +1,178 @@
+<svg width="1000" height="640" viewBox="0 0 1000 640" xmlns="http://www.w3.org/2000/svg" font-family="'Comic Sans MS','Segoe Print','Bradley Hand','Xingkai SC','KaiTi',cursive">
+  <title>微信雷达 · 架构与数据流</title>
+  <desc>本地优先的微信群聊情报看板：采集（wx-cli 仅 macOS）→ 同步引擎 → SQLite → 聚合读层 → API → UI，含 Codex CLI 可选分支与 Demo 模式分支。</desc>
+
+  <!-- 手绘抖动滤镜：只作用于形状，文字保持清晰 -->
+  <defs>
+    <filter id="rough" x="-4%" y="-4%" width="108%" height="108%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="2" seed="6" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <!-- 背景（保持清晰，不抖动） -->
+  <rect x="0" y="0" width="1000" height="640" fill="#f7f4ec"/>
+  <rect x="8" y="8" width="984" height="624" rx="18" fill="#fbfaf5" stroke="#e2dac9" stroke-width="1.5"/>
+
+  <!-- ================= 形状层（手绘抖动） ================= -->
+  <g filter="url(#rough)" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- 图例线 -->
+    <line x1="706" y1="40" x2="746" y2="40" stroke="#8a9284" stroke-width="2.4"/>
+    <line x1="706" y1="62" x2="746" y2="62" stroke="#8f83c9" stroke-width="2.4" stroke-dasharray="6 5"/>
+
+    <!-- ① 采集：macOS 专属容器 -->
+    <rect x="30" y="140" width="178" height="214" rx="12" fill="none" stroke="#6f9e86" stroke-width="1.8" stroke-dasharray="7 5"/>
+    <rect x="38" y="146" width="162" height="20" rx="6" fill="#d7e8d7" stroke="#6f9e86" stroke-width="1.2"/>
+    <rect x="44" y="176" width="150" height="32" rx="7" fill="#e4efe4" stroke="#6f9e86" stroke-width="1.8"/>
+    <rect x="44" y="222" width="150" height="32" rx="7" fill="#e4efe4" stroke="#6f9e86" stroke-width="1.8"/>
+    <rect x="44" y="268" width="150" height="32" rx="7" fill="#e4efe4" stroke="#6f9e86" stroke-width="1.8"/>
+    <rect x="44" y="314" width="150" height="32" rx="7" fill="#e4efe4" stroke="#6f9e86" stroke-width="1.8"/>
+
+    <!-- 采集列纵向箭头 -->
+    <g stroke="#8a9284" stroke-width="2" fill="#8a9284">
+      <line x1="119" y1="208" x2="119" y2="220"/><path d="M119,222 l -5,-9 l 10,0 z"/>
+      <line x1="119" y1="254" x2="119" y2="266"/><path d="M119,268 l -5,-9 l 10,0 z"/>
+      <line x1="119" y1="300" x2="119" y2="312"/><path d="M119,314 l -5,-9 l 10,0 z"/>
+    </g>
+
+    <!-- ② 同步引擎 -->
+    <rect x="250" y="158" width="170" height="34" rx="7" fill="#e3edf7" stroke="#6f8fb0" stroke-width="1.8"/>
+    <rect x="250" y="206" width="170" height="44" rx="7" fill="#e3edf7" stroke="#6f8fb0" stroke-width="1.8"/>
+    <rect x="250" y="264" width="170" height="40" rx="7" fill="#e3edf7" stroke="#6f8fb0" stroke-width="1.8"/>
+    <rect x="250" y="318" width="170" height="36" rx="7" fill="#e3edf7" stroke="#6f8fb0" stroke-width="1.8"/>
+
+    <g stroke="#8a9284" stroke-width="2" fill="#8a9284">
+      <line x1="335" y1="192" x2="335" y2="204"/><path d="M335,206 l -5,-9 l 10,0 z"/>
+      <line x1="335" y1="250" x2="335" y2="262"/><path d="M335,264 l -5,-9 l 10,0 z"/>
+      <line x1="335" y1="304" x2="335" y2="316"/><path d="M335,318 l -5,-9 l 10,0 z"/>
+    </g>
+
+    <!-- 采集 → 同步（elbow） -->
+    <g stroke="#8a9284" stroke-width="2" fill="#8a9284">
+      <path d="M194,330 L222,330 L222,175 L246,175" fill="none"/>
+      <path d="M250,175 l -9,-5 l 0,10 z"/>
+    </g>
+
+    <!-- ③ 存储：SQLite 圆柱 -->
+    <path d="M452,214 L452,322 A54,13 0 0 0 560,322 L560,214" fill="#ece2f2" stroke="#9179ad" stroke-width="1.8"/>
+    <ellipse cx="506" cy="214" rx="54" ry="13" fill="#e0d3ea" stroke="#9179ad" stroke-width="1.8"/>
+
+    <!-- 同步 → SQLite -->
+    <g stroke="#8a9284" stroke-width="2" fill="#8a9284">
+      <line x1="420" y1="292" x2="448" y2="276"/><path d="M452,274 l -10,0 l 5,9 z"/>
+    </g>
+
+    <!-- SQLite → 读层 数据总线 -->
+    <g stroke="#8a9284" stroke-width="2" fill="#8a9284">
+      <line x1="560" y1="262" x2="600" y2="262"/>
+      <line x1="600" y1="194" x2="600" y2="305" fill="none"/>
+      <line x1="600" y1="194" x2="614" y2="194"/><path d="M618,194 l -9,-5 l 0,10 z"/>
+      <line x1="600" y1="251" x2="614" y2="251"/><path d="M618,251 l -9,-5 l 0,10 z"/>
+      <line x1="600" y1="305" x2="614" y2="305"/><path d="M618,305 l -9,-5 l 0,10 z"/>
+    </g>
+
+    <!-- Codex CLI（可选，虚线） -->
+    <rect x="624" y="100" width="180" height="40" rx="9" fill="#e7e1fb" stroke="#8f83c9" stroke-width="1.8" stroke-dasharray="7 5"/>
+
+    <!-- ④ 聚合读层 -->
+    <rect x="618" y="172" width="186" height="44" rx="7" fill="#fbeedd" stroke="#cf9b63" stroke-width="1.8"/>
+    <rect x="618" y="232" width="186" height="38" rx="7" fill="#fbeedd" stroke="#cf9b63" stroke-width="1.8"/>
+    <rect x="618" y="286" width="186" height="38" rx="7" fill="#fbeedd" stroke="#cf9b63" stroke-width="1.8"/>
+
+    <!-- Codex 虚线依赖 → topics / link-intelligence -->
+    <g stroke="#8f83c9" stroke-width="2" fill="#8f83c9" stroke-dasharray="6 5">
+      <path d="M790,140 L812,140 L812,305" fill="none"/>
+      <line x1="812" y1="251" x2="808" y2="251"/>
+      <line x1="812" y1="305" x2="808" y2="305"/>
+    </g>
+    <g stroke="none" fill="#8f83c9">
+      <path d="M804,251 l 9,-5 l 0,10 z"/>
+      <path d="M804,305 l 9,-5 l 0,10 z"/>
+    </g>
+
+    <!-- ⑤ 展示 -->
+    <rect x="834" y="172" width="150" height="40" rx="7" fill="#fbe4ea" stroke="#cd7c8f" stroke-width="1.8"/>
+    <rect x="834" y="232" width="150" height="76" rx="9" fill="#fde9ef" stroke="#cd7c8f" stroke-width="1.8"/>
+
+    <g stroke="#8a9284" stroke-width="2" fill="#8a9284">
+      <line x1="804" y1="194" x2="830" y2="194"/><path d="M834,194 l -9,-5 l 0,10 z"/>
+      <line x1="854" y1="212" x2="854" y2="230"/><path d="M854,232 l -5,-9 l 10,0 z"/>
+    </g>
+
+    <!-- Demo 模式分支容器 -->
+    <rect x="250" y="430" width="340" height="94" rx="12" fill="#fdf7dc" stroke="#c9b34f" stroke-width="1.8" stroke-dasharray="7 5"/>
+    <rect x="262" y="456" width="150" height="52" rx="7" fill="#fdf3c6" stroke="#c9b34f" stroke-width="1.8"/>
+    <rect x="428" y="456" width="150" height="52" rx="7" fill="#fdf3c6" stroke="#c9b34f" stroke-width="1.8"/>
+
+    <g stroke="#b7982f" stroke-width="2" fill="#b7982f">
+      <line x1="412" y1="482" x2="424" y2="482"/><path d="M428,482 l -9,-5 l 0,10 z"/>
+      <line x1="503" y1="454" x2="503" y2="338" fill="none"/><path d="M503,334 l -5,9 l 10,0 z"/>
+    </g>
+
+  </g>
+
+  <!-- ================= 文字层（清晰） ================= -->
+  <!-- 标题 -->
+  <text x="36" y="48" font-size="26" font-weight="bold" fill="#33463b">微信雷达 · 架构与数据流</text>
+  <text x="38" y="74" font-size="13" fill="#6d7a6f">本地优先的微信群聊情报看板：采集 → 同步 → 存储 → 聚合 → 展示</text>
+
+  <!-- 图例 -->
+  <text x="752" y="44" font-size="11" fill="#6b7268">主数据链路</text>
+  <text x="752" y="66" font-size="11" fill="#6b7268">可选 / AI 依赖（Codex）</text>
+
+  <!-- ① 采集 -->
+  <text x="42" y="161" font-size="11" font-weight="bold" fill="#4d7a63">① 采集 · wx-cli 仅 macOS</text>
+  <text x="119" y="197" font-size="12" text-anchor="middle" fill="#2f4a3c">微信 WeChat</text>
+  <text x="119" y="243" font-size="12" text-anchor="middle" fill="#2f4a3c">wx daemon（常驻）</text>
+  <text x="119" y="289" font-size="11" text-anchor="middle" fill="#2f4a3c">wx CLI · execFile</text>
+  <text x="119" y="335" font-size="12" text-anchor="middle" fill="#2f4a3c">lib/wx.ts 封装</text>
+
+  <!-- ② 同步引擎 -->
+  <text x="250" y="138" font-size="12" font-weight="bold" fill="#9aa091">② 同步引擎</text>
+  <text x="335" y="180" font-size="12" text-anchor="middle" fill="#2f4457">/api/rescan · SSE</text>
+  <text x="335" y="225" font-size="11.5" text-anchor="middle" fill="#2f4457">syncFullHistory</text>
+  <text x="335" y="241" font-size="10" text-anchor="middle" fill="#5c6f80">群×月 · p-limit 并发</text>
+  <text x="335" y="283" font-size="11" text-anchor="middle" fill="#2f4457">bulkInsertMessages</text>
+  <text x="335" y="298" font-size="10" text-anchor="middle" fill="#5c6f80">即时抽链接</text>
+  <text x="335" y="341" font-size="10" text-anchor="middle" fill="#2f4457">aggregateDailyStats · mentions</text>
+
+  <!-- ③ 存储 -->
+  <text x="474" y="138" font-size="12" font-weight="bold" fill="#9aa091">③ 存储</text>
+  <text x="506" y="252" font-size="14" font-weight="bold" text-anchor="middle" fill="#6f5688">SQLite</text>
+  <text x="506" y="272" font-size="11" text-anchor="middle" fill="#6f5688">radar.db（WAL）</text>
+  <text x="506" y="290" font-size="10" text-anchor="middle" fill="#8a7b98">12 张表</text>
+
+  <!-- Codex -->
+  <text x="714" y="118" font-size="12" font-weight="bold" text-anchor="middle" fill="#6b5fb0">Codex CLI（可选）</text>
+  <text x="714" y="133" font-size="9" text-anchor="middle" fill="#6b5fb0">exec --sandbox read-only</text>
+
+  <!-- ④ 聚合读层 -->
+  <text x="618" y="160" font-size="12" font-weight="bold" fill="#9aa091">④ 聚合读层</text>
+  <text x="711" y="191" font-size="11.5" text-anchor="middle" fill="#8a5a1f">dashboard-intelligence</text>
+  <text x="711" y="207" font-size="10" text-anchor="middle" fill="#a06a2e">规则引擎（无 LLM）</text>
+  <text x="711" y="255" font-size="11" text-anchor="middle" fill="#8a5a1f">topics 话题聚合</text>
+  <text x="711" y="309" font-size="10.5" text-anchor="middle" fill="#8a5a1f">link-intelligence 链接情报</text>
+  <text x="618" y="345" font-size="9" fill="#a0785a">话题亦在 /api/rescan 内逐日构建（buildTopicsForDate）</text>
+
+  <!-- ⑤ 展示 -->
+  <text x="834" y="160" font-size="12" font-weight="bold" fill="#9aa091">⑤ 展示</text>
+  <text x="909" y="197" font-size="11.5" text-anchor="middle" fill="#a03a56">API（force-dynamic）</text>
+  <text x="909" y="258" font-size="12" font-weight="bold" text-anchor="middle" fill="#b0566e">UI 展示层</text>
+  <text x="909" y="278" font-size="11" text-anchor="middle" fill="#a03a56">驾驶舱 / 话题</text>
+  <text x="909" y="295" font-size="11" text-anchor="middle" fill="#a03a56">链接 / 群 / 信号</text>
+
+  <!-- Demo 模式 -->
+  <text x="262" y="448" font-size="11" font-weight="bold" fill="#97812f">Demo 模式（Windows 唯一可跑）</text>
+  <text x="337" y="479" font-size="10" text-anchor="middle" fill="#6f5e1c">WECHAT_RADAR_DEMO=1</text>
+  <text x="337" y="495" font-size="10" text-anchor="middle" fill="#6f5e1c">或 /setup 勾选</text>
+  <text x="503" y="479" font-size="11" text-anchor="middle" fill="#6f5e1c">seedDemoData</text>
+  <text x="503" y="495" font-size="8.5" text-anchor="middle" fill="#8a7830">写 messages/daily_stats</text>
+  <text x="512" y="402" font-size="10" fill="#97812f">绕过 wx-cli</text>
+  <text x="250" y="542" font-size="10" fill="#8a8f83">Demo 仅回填 messages/daily_stats；话题/链接仍需 Codex，否则为空。</text>
+
+  <!-- 脚注 -->
+  <text x="40" y="568" font-size="10" fill="#7a8377">图片旁路：MessageContent → /api/wx-image → 扫描 macOS 微信本地缓存（按 local_id 解析）</text>
+  <text x="40" y="588" font-size="10" fill="#7a8377">实时旁路：信号页 ← /api/new-messages（SSE 实时推送）</text>
+  <text x="40" y="608" font-size="10" fill="#7a8377">环境校验：pnpm lint / tsc --noEmit / pnpm build 均通过 · Next.js 16.2.6 Turbopack · 32 路由</text>
+</svg>

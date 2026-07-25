@@ -44,6 +44,18 @@ pnpm dev
 
 打开 [http://localhost:3000](http://localhost:3000)。首次进入会跳到 `/setup`，按页面提示填写你的微信名、确认隐私说明，也可以先启用 demo 数据体验。
 
+## 依赖环境（隔离环境）
+
+Node.js 项目中，项目级的 `node_modules/` 目录**就是隔离依赖环境**，等价于 Python 的 venv——**无需也不应该**再创建 Python venv。
+
+- 执行 `pnpm install` 后，依赖会被安装进项目级 `node_modules/`，由 `pnpm-lock.yaml` 锁定版本，不污染全局环境。
+- 由于 pnpm 10 默认会 **gate（拦截）原生模块的构建脚本**，`better-sqlite3` 需要额外运行 `pnpm approve-builds` 批准构建（或在 `pnpm-workspace.yaml` 的 `onlyBuiltDependencies` 中允许）。构建脚本未被批准时，单独运行 `pnpm rebuild better-sqlite3` 可能是 no-op（不会真正编译）。
+- **跨平台注意**：`wx-cli` 与真实微信读取仅 macOS 可用；Windows / Linux 建议用 demo 模式体验 UI，设置环境变量 `WECHAT_RADAR_DEMO=1` 即可。在 PowerShell 上：
+
+  ```powershell
+  $env:WECHAT_RADAR_DEMO=1; pnpm dev
+  ```
+
 ## 前置条件
 
 - [ ] macOS，且已登录微信 4.x
@@ -136,6 +148,8 @@ lib/                 wx-cli 封装、SQLite、话题/链接聚合逻辑
 scripts/             本地维护脚本
 docs/assets/         README 图片与公开素材
 ```
+
+> 项目现状盘点与迭代路线图见 [docs/roadmap.md](docs/roadmap.md)。
 
 ## 常见问题
 
