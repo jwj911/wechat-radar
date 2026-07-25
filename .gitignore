@@ -7,9 +7,9 @@ node_modules/
 .next/
 out/
 
-# production
-build/
-dist/
+# production (root build output only; anchored so nested routes like app/api/topics/build are not ignored)
+/build/
+/dist/
 
 # local env
 .env

@@ -113,12 +113,13 @@ weahat_radar/
 | `/api/ai-classify` | GET / POST | 启发式分类建议（重复实现分类逻辑） |
 | `/api/topics` | GET | 话题列表 |
 | `/api/topics/[id]` | GET | 话题详情 |
+| `/api/topics/build` | POST | SSE 构建指定日期话题（复用 `buildTopicsForDate`） |
 | `/api/topics/links` | GET | 链接情报（Codex） |
 | `/api/message-links/raw` | GET | 原始链接抽取 |
 | `/api/message-links/backfill` | POST | 链接回填（**无鉴权**） |
 | `/api/message-links/resolve` | POST | 链接解析 |
 
-> 说明：所有 API 均为 `force-dynamic`。前端「构建话题」按钮（`app/topics/page.tsx`）会 POST `/api/topics/build`，但**该路由并不存在**，详见第 10 节。
+> 说明：所有 API 均为 `force-dynamic`。前端「构建话题」按钮（`app/topics/page.tsx`）会 POST `/api/topics/build`，该路由已于本轮补齐（SSE，复用 `buildTopicsForDate`），详见第 10 节与第 11 节 N1。
 
 ## 6. 数据流
 
@@ -189,7 +190,7 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 ## 10. 代码质量观察
 
 - **零测试、无 CI、无 Node 版本锁定。**
-- **真实 Bug：`/api/topics/build` 端点缺失**——`app/topics/page.tsx:102` 的「构建」按钮会 POST `/api/topics/build`，但该路由不存在，必然 404；话题实际只能靠 `/api/rescan` 内部的 `buildTopicsForDate` 构建。
+- **~~真实 Bug：`/api/topics/build` 端点缺失~~（已修复，见 N1）**——原 `app/topics/page.tsx:102` 的「构建」按钮会 POST `/api/topics/build`，但该路由不存在、必然 404；现已补齐 `app/api/topics/build/route.ts`（SSE，复用 `buildTopicsForDate`），构建按钮不再 404。
 - **重复实现**：群分类 2 份（`lib/group-classifier.ts` 与 `app/api/ai-classify/route.ts`）、demo 播种 2 份（`lib/demo-data.ts` 与 `scripts/seed_demo.cjs`）、链接正则多处漂移、backfill 脚本复制了 lib 的 SQL。
 - **死代码/未用依赖**：`components/NewGroupModal.tsx` 未被引用；`next-themes` 已安装但未使用。
 - **配置脱节**：`defaultRange` 从未被消费，`defaultSyncDays` 不驱动同步。
@@ -204,10 +205,11 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 
 ### 近期（稳定基座）
 
-#### N1 · 修复 `/api/topics/build` 缺失 — P0
+#### N1 · 修复 `/api/topics/build` 缺失 — P0 ✅ 已完成
 - **目标**：让话题页「构建」按钮可用，消除 404。
 - **范围**：新增 `app/api/topics/build/route.ts`，复用 `lib/topics.ts` 的 `buildTopicsForDate`；或改造前端指向既有构建入口。
 - **验收要点**：点击构建按钮不再 404；指定日期能触发话题构建并返回结果；无 Codex 时有明确提示。
+- **结果**：已新增 `app/api/topics/build/route.ts`（SSE，复用 `buildTopicsForDate`），话题页构建按钮不再 404；lint / tsc / build 均通过，路由已出现在构建清单。
 
 #### N2 · 引入单元测试 + 首批用例 — P0
 - **目标**：为核心纯逻辑建立测试基线。

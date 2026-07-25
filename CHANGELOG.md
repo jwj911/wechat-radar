@@ -20,10 +20,14 @@
 
 - 更新 `README.md`：增补「依赖环境（隔离环境）」说明与 `docs/roadmap.md` 路线图入口。
 
+### 修复 (Fixed)
+
+- 新增 `app/api/topics/build/route.ts`（SSE 话题构建端点），修复话题雷达页面构建话题时 POST `/api/topics/build` 返回 404 的问题（路线图 N1）。
+
 ### 备注 (Notes)
 
 - `better-sqlite3` 在 pnpm 10 下需运行 `pnpm approve-builds` 才会真正编译（pnpm 10 默认 gate 构建脚本，单独 `pnpm rebuild better-sqlite3` 可能为 no-op）。
 - `wx-cli` 真实读取链路仅 macOS 可用；Windows / Linux 请用 demo 模式（`WECHAT_RADAR_DEMO=1`）体验 UI。
-- 已识别的待办（如 `/api/topics/build` 端点缺失、分类 / demo 播种逻辑重复、`next-themes` 已装未用、部分配置项未生效、Node 版本文档不一致等）详见 `docs/roadmap.md`。
+- 已识别的待办（如分类 / demo 播种逻辑重复、`next-themes` 已装未用、部分配置项未生效、Node 版本文档不一致等）详见 `docs/roadmap.md`；其中 `/api/topics/build` 端点缺失已于本轮修复（见「修复」）。
 
 [Unreleased]: https://github.com/jwj911/wechat-radar/commits/main
