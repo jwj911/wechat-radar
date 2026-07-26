@@ -189,7 +189,7 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 
 ## 10. 代码质量观察
 
-- **~~零测试~~、无 CI、无 Node 版本锁定。**（已接入 vitest 单元测试基线，见 N2；CI 与 Node 版本锁定见 N3/N4）
+- **~~零测试~~、~~无 CI~~、无 Node 版本锁定。**（已接入 vitest 单元测试基线，见 N2；已接入 GitHub Actions 最小 CI，见 N3；Node 版本锁定见 N4）
 - **~~真实 Bug：`/api/topics/build` 端点缺失~~（已修复，见 N1）**——原 `app/topics/page.tsx:102` 的「构建」按钮会 POST `/api/topics/build`，但该路由不存在、必然 404；现已补齐 `app/api/topics/build/route.ts`（SSE，复用 `buildTopicsForDate`），构建按钮不再 404。
 - **重复实现**：群分类 2 份（`lib/group-classifier.ts` 与 `app/api/ai-classify/route.ts`）、demo 播种 2 份（`lib/demo-data.ts` 与 `scripts/seed_demo.cjs`）、链接正则多处漂移、backfill 脚本复制了 lib 的 SQL。
 - **死代码/未用依赖**：`components/NewGroupModal.tsx` 未被引用；`next-themes` 已安装但未使用。
@@ -217,10 +217,11 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 - **验收要点**：`pnpm test` 可运行；上述模块关键路径有断言；用例可稳定复跑。
 - **结果**：接入 vitest 4.1.10 + `vitest.config.ts`（node 环境），新增 `pnpm test` / `pnpm test:watch` 脚本；首批 5 个测试文件、62 个用例全部通过，连跑两次结果一致（无 flake）。DB 相关模块（`mentions` / `dashboard-intelligence`）用内存 SQLite（`:memory:`）+ `vi.mock` 隔离，不落磁盘文件；lint / tsc / build 均通过。
 
-#### N3 · 最小 CI — P0
+#### N3 · 最小 CI — P0 ✅ 已完成
 - **目标**：把质量门禁自动化。
 - **范围**：新增 `.github/workflows/ci.yml`，流水线为 install → lint → tsc → test → build。
 - **验收要点**：PR 触发 CI；任一环节失败则流水线红；主分支保持绿。
+- **结果**：已新增 `.github/workflows/ci.yml`（`push` main + `pull_request` 触发，ubuntu-latest，Node 22 + pnpm 缓存，`install --frozen-lockfile` → lint → tsc → test → build）。同时在 `pnpm-workspace.yaml` 加入 `onlyBuiltDependencies: [better-sqlite3]`——这是 CI 变绿的必要项（pnpm 10 默认 gate 原生模块构建脚本，不放行则 `pnpm test` 无法加载 SQLite native binding），也兑现了 N4 的构建白名单部分。本地已等价复现整条流水线全部通过（install 会真正编译 better-sqlite3、lint/tsc/test 62 用例/build 均绿）。
 
 #### N4 · 锁定运行环境 — P0
 - **目标**：环境可复现，消除 Node 版本歧义。

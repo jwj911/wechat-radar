@@ -3,6 +3,7 @@
 > 群太多，真正有价值的消息却总是被淹没。
 > WeChat Radar turns noisy WeChat groups into a local-first intelligence dashboard.
 
+[![CI](https://github.com/jwj911/wechat-radar/actions/workflows/ci.yml/badge.svg)](https://github.com/jwj911/wechat-radar/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/joeseesun/wechat-radar?style=social)](https://github.com/joeseesun/wechat-radar/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/joeseesun/wechat-radar?style=social)](https://github.com/joeseesun/wechat-radar/network/members)
 [![Issues](https://img.shields.io/github/issues/joeseesun/wechat-radar)](https://github.com/joeseesun/wechat-radar/issues)
@@ -68,6 +69,8 @@ pnpm test:watch  # 监听模式
 ```
 
 首批用例覆盖 `lib/` 的核心纯逻辑（`range`、`group-classifier`、`message-links`）以及依赖 SQLite 的 `mentions`、`dashboard-intelligence`（后者用内存数据库 `:memory:` 隔离，无需真实微信数据，可跨平台稳定复跑）。
+
+**持续集成（CI）**：`.github/workflows/ci.yml` 会在推送到 `main` 与提交 Pull Request 时自动运行 install → lint → tsc → test → build（ubuntu-latest，Node 22 + pnpm 缓存）。任一环节失败流水线即标红，可在仓库的 Actions 页查看结果。
 
 ## 前置条件
 

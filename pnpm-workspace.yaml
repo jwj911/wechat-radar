@@ -1,3 +1,8 @@
+# 放行原生模块的构建脚本：CI（pnpm install --frozen-lockfile）需要 better-sqlite3
+# 完成编译，否则单元测试（:memory: SQLite）无法加载 native binding。
+onlyBuiltDependencies:
+  - better-sqlite3
+
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
