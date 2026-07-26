@@ -20,7 +20,7 @@
 | 样式 | Tailwind CSS v4 + CSS 变量主题 |
 | 图标 | lucide-react |
 | 外部 CLI | `wx`（wx-cli，仅 macOS）、`codex`（Codex CLI，可选） |
-| 未使用依赖 | next-themes（已安装但未使用，主题为 `components/ThemeToggle.tsx` 手写实现） |
+| 未使用依赖 | 当前未发现；N5 已移除未使用的 `next-themes` |
 
 脚本：`dev` / `build` / `start` / `lint` / `test` / `test:watch` / `db:backup` / `demo:seed`。已接入 vitest（见第 11 节 N2）。
 
@@ -58,9 +58,9 @@ weahat_radar/
 │   ├── groups.ts             # 分组/标签/收藏 CRUD
 │   ├── group-classifier.ts   # 群名启发式分类
 │   ├── range.ts              # 日期/范围纯函数工具
-│   └── demo-data.ts          # 注入 demo 数据
-├── components/               # 11 个 React 组件（见第 4 节末）
-├── scripts/                  # backfill_empty_groups.cjs / backup-cockpit-db.mjs / seed_demo.cjs
+│   └── demo-data.ts          # 注入 demo 数据（消费共享 dataset）
+├── components/               # 10 个 React 组件（见第 4 节末）
+├── scripts/                  # 维护脚本 + demo-dataset.json 共享数据源
 ├── docs/
 │   ├── roadmap.md            # 本文档
 │   └── assets/               # architecture.svg / product-preview.svg
@@ -85,11 +85,11 @@ weahat_radar/
 | `lib/stats-aggregator.ts` | 同步引擎。`syncFullHistory`（群×月分块 + p-limit 并发 `wxHistory` → `bulkInsertMessages` → `aggregateDailyStats` → sync_state → `rebuildMentionIndexFromMessages`），比逐天快约 30 倍；旧 rescan 逻辑保留。 |
 | `lib/mentions.ts` | @我的。用 `instr()` 子串匹配；以 `meta.mention_index_state` 签名做增量失效校验。 |
 | `lib/groups.ts` | 分组/标签/收藏 CRUD（prepared statement）。 |
-| `lib/group-classifier.ts` | 群名启发式分类（约 18 条顺序敏感正则 → 14 个默认分组）。注意 `app/api/ai-classify/route.ts` 又重复实现了一份（规则漂移风险）。 |
+| `lib/group-classifier.ts` | 群名启发式分类（顺序敏感正则 → 默认分组）；`sessions` / `stats` / `ai-classify` 共用此单一实现。 |
 | `lib/range.ts` | 日期/范围工具（纯函数）。 |
-| `lib/demo-data.ts` | 注入 14 天 × 5 群 demo 数据；与 `scripts/seed_demo.cjs` 高度重复。 |
+| `lib/demo-data.ts` | 注入 14 天 × 5 群 demo 数据；与 `scripts/seed_demo.cjs` 共享 `scripts/demo-dataset.json`。 |
 
-组件（`components/`，共 11 个）：Sidebar、TopBar、StatGrid、TrendChart、CategoryChart、ActiveGroupsList、IntelligenceBrief、MessageContent、GlobalSearch、ThemeToggle、NewGroupModal（未被引用，疑似死代码）。
+组件（`components/`，共 10 个）：Sidebar、TopBar、StatGrid、TrendChart、CategoryChart、ActiveGroupsList、IntelligenceBrief、MessageContent、GlobalSearch、ThemeToggle。
 
 ## 5. API 路由清单
 
@@ -110,7 +110,7 @@ weahat_radar/
 | `/api/groups` | GET / POST / DELETE | 分组 CRUD |
 | `/api/group-tags` | GET / POST | 群标签读写 |
 | `/api/group/[id]` | GET | 单群详情 |
-| `/api/ai-classify` | GET / POST | 启发式分类建议（重复实现分类逻辑） |
+| `/api/ai-classify` | GET / POST | 启发式分类建议（复用 `lib/group-classifier.ts`） |
 | `/api/topics` | GET | 话题列表 |
 | `/api/topics/[id]` | GET | 话题详情 |
 | `/api/topics/build` | POST | SSE 构建指定日期话题（复用 `buildTopicsForDate`） |
@@ -191,8 +191,8 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 
 - **~~零测试~~、~~无 CI~~、~~无 Node 版本锁定~~。**（已接入 vitest 单元测试基线，见 N2；已接入 GitHub Actions 最小 CI，见 N3；已用 `engines`/`.nvmrc` 锁定 Node 22，见 N4）
 - **~~真实 Bug：`/api/topics/build` 端点缺失~~（已修复，见 N1）**——原 `app/topics/page.tsx:102` 的「构建」按钮会 POST `/api/topics/build`，但该路由不存在、必然 404；现已补齐 `app/api/topics/build/route.ts`（SSE，复用 `buildTopicsForDate`），构建按钮不再 404。
-- **重复实现**：群分类 2 份（`lib/group-classifier.ts` 与 `app/api/ai-classify/route.ts`）、demo 播种 2 份（`lib/demo-data.ts` 与 `scripts/seed_demo.cjs`）、链接正则多处漂移、backfill 脚本复制了 lib 的 SQL。
-- **死代码/未用依赖**：`components/NewGroupModal.tsx` 未被引用；`next-themes` 已安装但未使用。
+- **重复实现（部分已解决，见 N5）**：群分类已收敛到 `lib/group-classifier.ts`；demo 分组/发送者/消息文本已收敛到 `scripts/demo-dataset.json`。链接正则多处漂移、backfill 脚本复制 lib SQL 仍待后续处理。
+- **~~死代码/未用依赖~~（已解决，见 N5）**：已删除无引用的 `components/NewGroupModal.tsx`，并移除零源码引用的 `next-themes`。
 - **配置脱节**：`defaultRange` 从未被消费，`defaultSyncDays` 不驱动同步。
 - **类型断言绕过**：存在 `as unknown`；DB 出参无运行时校验。
 - **错误处理静默回落**：掩盖了真实故障。
@@ -229,10 +229,11 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 - **验收要点**：`engines` 与 `.nvmrc` 一致；文档明确最低 Node 版本与原生模块构建/降级路径。
 - **结果**：`package.json` 新增 `engines`（`node>=22`、`pnpm>=10`）与 `packageManager: pnpm@10.33.2`（同时让 CI 的 `pnpm/action-setup` 能解析版本），`@types/node` 升至 `^22` 并同步 `pnpm-lock.yaml`；新增 `.nvmrc=22` 与 `engines.node` 一致。README 前置条件中英文统一为 Node 22+ 并说明 `.nvmrc`/`engines`；`better-sqlite3` 构建白名单已在 N3 完成。本地 install(`--frozen-lockfile` 通过)/lint/tsc/test(62)/build 全绿。
 
-#### N5 · 去重与死代码清理 — P1
+#### N5 · 去重与死代码清理 — P1 ✅ 已完成
 - **目标**：收敛重复实现，降低漂移。
 - **范围**：`ai-classify` 复用 `lib/group-classifier.ts`；demo 播种收敛为单一来源；删除或接线 `NewGroupModal`；处理未使用的 `next-themes`。
 - **验收要点**：分类/播种仅存一份实现；无未引用组件与未用依赖残留；行为不回归。
+- **结果**：`ai-classify` 已删除本地规则并复用 `lib/group-classifier.ts`，与 `sessions` / `stats` 的自动归类保持一致；新增 `scripts/demo-dataset.json`，供 `lib/demo-data.ts` 与 `scripts/seed_demo.cjs` 共享分组/发送者/消息文本；删除 `NewGroupModal.tsx`，移除 `next-themes` 并同步 lock。lint / tsc / 62 个单测 / build 全绿；临时目录 demo 播种成功（1258 条消息、70 条统计、5 个群），且未污染真实数据库。
 
 ### 中期（工程化提升）
 

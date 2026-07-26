@@ -45,6 +45,8 @@ pnpm dev
 
 打开 [http://localhost:3000](http://localhost:3000)。首次进入会跳到 `/setup`，按页面提示填写你的微信名、确认隐私说明，也可以先启用 demo 数据体验。
 
+应用内 demo 模式与 `pnpm demo:seed` 共用 `scripts/demo-dataset.json`，因此两种入口的示例群、发送者和消息内容保持一致。命令行播种可配合临时目录使用：`WECHAT_RADAR_DATA_DIR=<目录> pnpm demo:seed`。
+
 ## 依赖环境（隔离环境）
 
 Node.js 项目中，项目级的 `node_modules/` 目录**就是隔离依赖环境**，等价于 Python 的 venv——**无需也不应该**再创建 Python venv。
@@ -210,6 +212,8 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The first run redirects to `/setup`, where you can configure your WeChat display names and privacy confirmation, or enable demo mode.
+
+In-app demo mode and `pnpm demo:seed` share `scripts/demo-dataset.json`, so both entry points use the same sample groups, senders, and messages. Set `WECHAT_RADAR_DATA_DIR=<dir>` to seed an isolated database.
 
 ### Requirements
 

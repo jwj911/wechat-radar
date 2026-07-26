@@ -23,6 +23,12 @@
 - 更新 `README.md`：增补「依赖环境（隔离环境）」说明与 `docs/roadmap.md` 路线图入口。
 - `pnpm-workspace.yaml` 新增 `onlyBuiltDependencies: [better-sqlite3]`，放行原生模块构建脚本，使 CI 的 `pnpm install --frozen-lockfile` 能完成 `better-sqlite3` 编译（否则测试无法加载 native binding）。
 - 锁定运行环境（路线图 N4）：`package.json` 新增 `engines`（`node>=22`、`pnpm>=10`）与 `packageManager: pnpm@10.33.2`，`@types/node` 升至 `^22`（同步 `pnpm-lock.yaml`）；新增 `.nvmrc=22`；README 前置条件统一为 Node 22+（对齐 `lib/wx-image.ts` 依赖的 `fs.promises.glob`）。
+- 去重（路线图 N5）：`app/api/ai-classify/route.ts` 复用 `lib/group-classifier.ts`，避免建议分类与系统自动归类规则漂移；新增 `scripts/demo-dataset.json`，让应用内 demo 播种与 `pnpm demo:seed` 共用分组、发送者和消息文本。
+
+### 移除 (Removed)
+
+- 删除无任何引用的 `components/NewGroupModal.tsx`。
+- 移除源码零引用的 `next-themes` 依赖并同步 `pnpm-lock.yaml`。
 
 ### 修复 (Fixed)
 
@@ -32,6 +38,6 @@
 
 - `better-sqlite3` 在 pnpm 10 下需运行 `pnpm approve-builds` 才会真正编译（pnpm 10 默认 gate 构建脚本，单独 `pnpm rebuild better-sqlite3` 可能为 no-op）。
 - `wx-cli` 真实读取链路仅 macOS 可用；Windows / Linux 请用 demo 模式（`WECHAT_RADAR_DEMO=1`）体验 UI。
-- 已识别的待办（如分类 / demo 播种逻辑重复、`next-themes` 已装未用、部分配置项未生效、Node 版本文档不一致等）详见 `docs/roadmap.md`；其中 `/api/topics/build` 端点缺失已于本轮修复（见「修复」）。
+- 已识别的剩余待办（如部分配置项未生效、API 错误处理与可观测性等）详见 `docs/roadmap.md`；端点缺失、分类/demo 数据重复、未用依赖与 Node 版本不一致已在 N1-N5 中处理。
 
 [Unreleased]: https://github.com/jwj911/wechat-radar/commits/main
