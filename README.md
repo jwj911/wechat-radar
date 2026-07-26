@@ -77,8 +77,8 @@ pnpm test:watch  # 监听模式
 - [ ] macOS，且已登录微信 4.x
 - [ ] 建议使用注册半年以上的小号或测试号，不建议直接使用主力微信号
 - [ ] 已测试微信版本：`4.1.9.58`；不建议在更高版本上贸然测试
-- [ ] Node.js 20+：`node --version`
-- [ ] pnpm：`corepack enable && pnpm --version`
+- [ ] Node.js 22+（本仓库以 `.nvmrc` 与 `package.json` 的 `engines` 锁定，`lib/wx-image.ts` 依赖 Node 22+ 的 `fs.promises.glob`）：`node --version`；用 nvm 可直接 `nvm use`
+- [ ] pnpm 10+（`package.json` 的 `packageManager` 锁定为 `pnpm@10.33.2`）：`corepack enable && pnpm --version`
 - [ ] wx-cli：`wx --version`
 - [ ] wx daemon 正在运行：`wx daemon status`
 - [ ] 如果要让话题聚合更好，安装并登录 Codex CLI：`codex --version`
@@ -216,8 +216,8 @@ Open [http://localhost:3000](http://localhost:3000). The first run redirects to 
 - [ ] macOS with WeChat 4.x logged in
 - [ ] Prefer a secondary/test WeChat account that has existed for at least six months
 - [ ] Tested WeChat version: `4.1.9.58`; newer versions are not recommended for unverified testing
-- [ ] Node.js 20+
-- [ ] pnpm
+- [ ] Node.js 22+ (locked via `.nvmrc` and `package.json` `engines`; `lib/wx-image.ts` relies on `fs.promises.glob` which needs Node 22+) — run `nvm use`
+- [ ] pnpm 10+ (`packageManager` pinned to `pnpm@10.33.2`)
 - [ ] wx-cli initialized and running
 - [ ] Optional: Codex CLI for better topic/link summaries
 

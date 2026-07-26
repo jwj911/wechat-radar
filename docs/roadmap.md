@@ -175,8 +175,8 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 - **wx-cli 仅 macOS**，且仅在 WeChat 4.1.9.58 上测试过。
 - **Codex CLI 可选**，但对话题聚合与链接情报是硬依赖；无 Codex 时相关能力为空。
 - **better-sqlite3 为原生模块**，需要编译：Windows 需 MSVC / Build Tools，或使用预编译二进制。
-- **未锁定 Node 版本**：无 `engines`、无 `.nvmrc`。
-- **版本不一致**：`lib/wx-image.ts` 使用 `fs.promises.glob`（Node 22+），而 README / `@types/node` 声称 Node 20+。
+- **~~未锁定 Node 版本~~（已解决，见 N4）**：已新增 `engines`（`node>=22`）与 `.nvmrc=22`。
+- **~~版本不一致~~（已解决，见 N4）**：`lib/wx-image.ts` 使用 `fs.promises.glob`（Node 22+）；现已通过 `engines`/`.nvmrc`/`@types/node ^22` 与 README 统一锁定为 Node 22+。
 - **外网请求**：`link-intelligence` 在补全标题时会发起外部网页请求。
 
 ## 9. 已知风险与合规
@@ -189,7 +189,7 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 
 ## 10. 代码质量观察
 
-- **~~零测试~~、~~无 CI~~、无 Node 版本锁定。**（已接入 vitest 单元测试基线，见 N2；已接入 GitHub Actions 最小 CI，见 N3；Node 版本锁定见 N4）
+- **~~零测试~~、~~无 CI~~、~~无 Node 版本锁定~~。**（已接入 vitest 单元测试基线，见 N2；已接入 GitHub Actions 最小 CI，见 N3；已用 `engines`/`.nvmrc` 锁定 Node 22，见 N4）
 - **~~真实 Bug：`/api/topics/build` 端点缺失~~（已修复，见 N1）**——原 `app/topics/page.tsx:102` 的「构建」按钮会 POST `/api/topics/build`，但该路由不存在、必然 404；现已补齐 `app/api/topics/build/route.ts`（SSE，复用 `buildTopicsForDate`），构建按钮不再 404。
 - **重复实现**：群分类 2 份（`lib/group-classifier.ts` 与 `app/api/ai-classify/route.ts`）、demo 播种 2 份（`lib/demo-data.ts` 与 `scripts/seed_demo.cjs`）、链接正则多处漂移、backfill 脚本复制了 lib 的 SQL。
 - **死代码/未用依赖**：`components/NewGroupModal.tsx` 未被引用；`next-themes` 已安装但未使用。
@@ -223,10 +223,11 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 - **验收要点**：PR 触发 CI；任一环节失败则流水线红；主分支保持绿。
 - **结果**：已新增 `.github/workflows/ci.yml`（`push` main + `pull_request` 触发，ubuntu-latest，Node 22 + pnpm 缓存，`install --frozen-lockfile` → lint → tsc → test → build）。同时在 `pnpm-workspace.yaml` 加入 `onlyBuiltDependencies: [better-sqlite3]`——这是 CI 变绿的必要项（pnpm 10 默认 gate 原生模块构建脚本，不放行则 `pnpm test` 无法加载 SQLite native binding），也兑现了 N4 的构建白名单部分。本地已等价复现整条流水线全部通过（install 会真正编译 better-sqlite3、lint/tsc/test 62 用例/build 均绿）。
 
-#### N4 · 锁定运行环境 — P0
+#### N4 · 锁定运行环境 — P0 ✅ 已完成
 - **目标**：环境可复现，消除 Node 版本歧义。
 - **范围**：新增 `engines` + `.nvmrc`；统一 glob 所需的 Node 版本要求（对齐 `fs.promises.glob` 的 Node 22+）；补充 `better-sqlite3` 的 `approve-builds`/降级文档。
 - **验收要点**：`engines` 与 `.nvmrc` 一致；文档明确最低 Node 版本与原生模块构建/降级路径。
+- **结果**：`package.json` 新增 `engines`（`node>=22`、`pnpm>=10`）与 `packageManager: pnpm@10.33.2`（同时让 CI 的 `pnpm/action-setup` 能解析版本），`@types/node` 升至 `^22` 并同步 `pnpm-lock.yaml`；新增 `.nvmrc=22` 与 `engines.node` 一致。README 前置条件中英文统一为 Node 22+ 并说明 `.nvmrc`/`engines`；`better-sqlite3` 构建白名单已在 N3 完成。本地 install(`--frozen-lockfile` 通过)/lint/tsc/test(62)/build 全绿。
 
 #### N5 · 去重与死代码清理 — P1
 - **目标**：收敛重复实现，降低漂移。

@@ -22,6 +22,7 @@
 
 - 更新 `README.md`：增补「依赖环境（隔离环境）」说明与 `docs/roadmap.md` 路线图入口。
 - `pnpm-workspace.yaml` 新增 `onlyBuiltDependencies: [better-sqlite3]`，放行原生模块构建脚本，使 CI 的 `pnpm install --frozen-lockfile` 能完成 `better-sqlite3` 编译（否则测试无法加载 native binding）。
+- 锁定运行环境（路线图 N4）：`package.json` 新增 `engines`（`node>=22`、`pnpm>=10`）与 `packageManager: pnpm@10.33.2`，`@types/node` 升至 `^22`（同步 `pnpm-lock.yaml`）；新增 `.nvmrc=22`；README 前置条件统一为 Node 22+（对齐 `lib/wx-image.ts` 依赖的 `fs.promises.glob`）。
 
 ### 修复 (Fixed)
 
