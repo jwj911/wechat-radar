@@ -56,6 +56,19 @@ Node.js 项目中，项目级的 `node_modules/` 目录**就是隔离依赖环�
   $env:WECHAT_RADAR_DEMO=1; pnpm dev
   ```
 
+## 开发与测试
+
+常用脚本：`pnpm dev`（开发）、`pnpm build`（生产构建）、`pnpm lint`（ESLint）、`npx tsc --noEmit`（类型检查）。
+
+单元测试基于 [Vitest](https://vitest.dev/)：
+
+```bash
+pnpm test        # 单次运行全部用例
+pnpm test:watch  # 监听模式
+```
+
+首批用例覆盖 `lib/` 的核心纯逻辑（`range`、`group-classifier`、`message-links`）以及依赖 SQLite 的 `mentions`、`dashboard-intelligence`（后者用内存数据库 `:memory:` 隔离，无需真实微信数据，可跨平台稳定复跑）。
+
 ## 前置条件
 
 - [ ] macOS，且已登录微信 4.x

@@ -22,7 +22,7 @@
 | 外部 CLI | `wx`（wx-cli，仅 macOS）、`codex`（Codex CLI，可选） |
 | 未使用依赖 | next-themes（已安装但未使用，主题为 `components/ThemeToggle.tsx` 手写实现） |
 
-脚本：`dev` / `build` / `start` / `lint` / `db:backup` / `demo:seed`。当前**无测试脚本**。
+脚本：`dev` / `build` / `start` / `lint` / `test` / `test:watch` / `db:backup` / `demo:seed`。已接入 vitest（见第 11 节 N2）。
 
 ## 3. 目录结构
 
@@ -189,7 +189,7 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 
 ## 10. 代码质量观察
 
-- **零测试、无 CI、无 Node 版本锁定。**
+- **~~零测试~~、无 CI、无 Node 版本锁定。**（已接入 vitest 单元测试基线，见 N2；CI 与 Node 版本锁定见 N3/N4）
 - **~~真实 Bug：`/api/topics/build` 端点缺失~~（已修复，见 N1）**——原 `app/topics/page.tsx:102` 的「构建」按钮会 POST `/api/topics/build`，但该路由不存在、必然 404；现已补齐 `app/api/topics/build/route.ts`（SSE，复用 `buildTopicsForDate`），构建按钮不再 404。
 - **重复实现**：群分类 2 份（`lib/group-classifier.ts` 与 `app/api/ai-classify/route.ts`）、demo 播种 2 份（`lib/demo-data.ts` 与 `scripts/seed_demo.cjs`）、链接正则多处漂移、backfill 脚本复制了 lib 的 SQL。
 - **死代码/未用依赖**：`components/NewGroupModal.tsx` 未被引用；`next-themes` 已安装但未使用。
@@ -211,10 +211,11 @@ $env:WECHAT_RADAR_DEMO=1; pnpm dev
 - **验收要点**：点击构建按钮不再 404；指定日期能触发话题构建并返回结果；无 Codex 时有明确提示。
 - **结果**：已新增 `app/api/topics/build/route.ts`（SSE，复用 `buildTopicsForDate`），话题页构建按钮不再 404；lint / tsc / build 均通过，路由已出现在构建清单。
 
-#### N2 · 引入单元测试 + 首批用例 — P0
+#### N2 · 引入单元测试 + 首批用例 — P0 ✅ 已完成
 - **目标**：为核心纯逻辑建立测试基线。
 - **范围**：接入 vitest，覆盖 `range.ts`、`message-links.ts`、`group-classifier.ts`、`dashboard-intelligence.ts`、`mentions.ts`。
 - **验收要点**：`pnpm test` 可运行；上述模块关键路径有断言；用例可稳定复跑。
+- **结果**：接入 vitest 4.1.10 + `vitest.config.ts`（node 环境），新增 `pnpm test` / `pnpm test:watch` 脚本；首批 5 个测试文件、62 个用例全部通过，连跑两次结果一致（无 flake）。DB 相关模块（`mentions` / `dashboard-intelligence`）用内存 SQLite（`:memory:`）+ `vi.mock` 隔离，不落磁盘文件；lint / tsc / build 均通过。
 
 #### N3 · 最小 CI — P0
 - **目标**：把质量门禁自动化。

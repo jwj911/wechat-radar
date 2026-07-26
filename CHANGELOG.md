@@ -15,6 +15,7 @@
 - 产出手绘风格架构图 `docs/assets/architecture.svg`。
 - 新增本地 `AGENTS.md` 协作 / Agent 指南（已被 `.gitignore` 忽略，不入库）。
 - 新增本 `CHANGELOG.md`。
+- 引入 Vitest 单元测试基线（路线图 N2）：接入 `vitest`（devDependency）+ `vitest.config.ts`，新增 `pnpm test` / `pnpm test:watch` 脚本；首批 5 个测试文件、62 个用例覆盖 `range` / `group-classifier` / `message-links`（纯逻辑）与 `mentions` / `dashboard-intelligence`（内存 SQLite `:memory:` + `vi.mock` 隔离），可稳定复跑。
 
 ### 变更 (Changed)
 

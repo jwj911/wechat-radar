@@ -8,6 +8,8 @@
     "db:backup": "node scripts/backup-cockpit-db.mjs",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "demo:seed": "node scripts/seed_demo.cjs"
   },
   "dependencies": {
@@ -33,7 +35,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   },
   "description": "Local-first WeChat group intelligence dashboard",
   "license": "SEE LICENSE IN LICENSE"
